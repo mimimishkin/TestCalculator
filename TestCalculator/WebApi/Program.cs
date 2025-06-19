@@ -15,7 +15,7 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddScoped<ICalculator, Calculator>();
-        builder.Services.AddDbContext<OperationLogDbContext>(options =>
+        builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -45,7 +45,7 @@ public class Program
         // Ensure a database is created and migrated
         using (var scope = app.Services.CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<OperationLogDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             db.Database.EnsureCreated();
         }
 

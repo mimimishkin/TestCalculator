@@ -7,15 +7,15 @@ namespace TestCalculator.Tests;
 
 public class CalculatorControllerTests : IDisposable
 {
-    private readonly OperationLogDbContext _dbContext;
+    private readonly AppDbContext _dbContext;
     private readonly CalculatorController _controller;
 
     public CalculatorControllerTests()
     {
-        var options = new DbContextOptionsBuilder<OperationLogDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite("Filename=:memory:")
             .Options;
-        _dbContext = new OperationLogDbContext(options);
+        _dbContext = new AppDbContext(options);
         _dbContext.Database.OpenConnection();
         _dbContext.Database.EnsureCreated();
         _controller = new CalculatorController(new Calculator(), _dbContext);

@@ -11,7 +11,7 @@ namespace TestCalculator.WebApi;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TokenController(IConfiguration configuration, OperationLogDbContext dbContext) : ControllerBase
+public class TokenController(IConfiguration configuration, AppDbContext dbContext) : ControllerBase
 {
     [HttpPost("register")]
     public IActionResult Register([FromBody] LoginRequest request)

@@ -7,7 +7,7 @@ namespace TestCalculator.WebApi;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class CalculatorController(ICalculator calculator, OperationLogDbContext dbContext) : ControllerBase
+public class CalculatorController(ICalculator calculator, AppDbContext dbContext) : ControllerBase
 {
     private IActionResult HandleCalculation(string operation, object parameters, Func<double> calculation)
     {

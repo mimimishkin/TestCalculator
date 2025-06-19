@@ -25,14 +25,14 @@ public class JwtAuthorizationTests : IClassFixture<WebApplicationFactory<Program
         {
             builder.ConfigureServices(services =>
             {
-                services.RemoveAll<DbContextOptions<OperationLogDbContext>>();
-                services.AddDbContext<OperationLogDbContext>(options => options.UseSqlite(_connection));
+                services.RemoveAll<DbContextOptions<AppDbContext>>();
+                services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
             });
         });
 
         // Ensure the schema is created
         using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<OperationLogDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Database.EnsureCreated();
     }
 
