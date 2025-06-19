@@ -1,12 +1,31 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TestCalculator.WebApi;
 using TestCalculator.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace TestCalculator.Tests;
 
-public class CalculatorControllerTests
+public class CalculatorControllerTests : IDisposable
 {
-    private readonly CalculatorController _controller = new(new Calculator());
+    private readonly OperationLogDbContext _dbContext;
+    private readonly CalculatorController _controller;
+
+    public CalculatorControllerTests()
+    {
+        var options = new DbContextOptionsBuilder<OperationLogDbContext>()
+            .UseSqlite("Filename=:memory:")
+            .Options;
+        _dbContext = new OperationLogDbContext(options);
+        _dbContext.Database.OpenConnection();
+        _dbContext.Database.EnsureCreated();
+        _controller = new CalculatorController(new Calculator(), _dbContext);
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Database.CloseConnection();
+        _dbContext.Dispose();
+    }
 
     [Fact]
     public void Add_ReturnsOkResult_WithExpectedValue()
@@ -86,6 +105,17 @@ public class CalculatorControllerTests
         Assert.NotNull(result);
         Assert.Equal(400, result.StatusCode);
         Assert.Contains("Number cannot be lower than zero for even root", result.Value!.ToString());
+    }
+
+    [Fact]
+    public void Add_LogsOperationToDatabase()
+    {
+        _controller.Add(2, 3);
+        var log = _dbContext.OperationLogs.FirstOrDefault(l => l.Operation == "Add");
+        Assert.NotNull(log);
+        Assert.Contains("\"a\":2", log.Parameters);
+        Assert.Contains("\"b\":3", log.Parameters);
+        Assert.Equal("5", log.Result);
     }
 }
 
