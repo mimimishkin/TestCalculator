@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TestCalculator.Domain;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TestCalculator.WebApi;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CalculatorController(ICalculator calculator, OperationLogDbContext dbContext) : ControllerBase
 {
     private IActionResult HandleCalculation(string operation, object parameters, Func<double> calculation)

@@ -1,9 +1,12 @@
 using TestCalculator.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TestCalculator.WebApi;
 
-public static class Program
+public class Program
 {
     public static void Main(string[] args)
     {
@@ -15,6 +18,26 @@ public static class Program
         builder.Services.AddDbContext<OperationLogDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+        var jwtSettings = builder.Configuration.GetSection("Jwt");
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!))
+            };
+        });
+
         var app = builder.Build();
 
         app.MapControllers();
@@ -25,6 +48,9 @@ public static class Program
             var db = scope.ServiceProvider.GetRequiredService<OperationLogDbContext>();
             db.Database.EnsureCreated();
         }
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.Run();
     }
