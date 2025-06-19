@@ -33,6 +33,10 @@ public class Calculator : ICalculator
     {
         if (nthRoot == 0)
             throw new ArgumentException("Root cannot be zero", nameof(nthRoot));
+        
+        if (number < 0 && nthRoot % 2 == 0)
+            throw new ArgumentException("Number cannot be lower than zero for even root", nameof(nthRoot));
+        
         return Math.Pow(number, 1.0 / nthRoot);
     }
 }
