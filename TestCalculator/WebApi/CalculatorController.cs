@@ -43,4 +43,16 @@ public class CalculatorController(ICalculator calculator) : ControllerBase
     {
         return HandleCalculation(() => calculator.Divide(a, b));
     }
+
+    [HttpGet("power")]
+    public IActionResult Power([FromQuery] double baseNumber, [FromQuery] double exponent)
+    {
+        return HandleCalculation(() => calculator.Power(baseNumber, exponent));
+    }
+
+    [HttpGet("root")]
+    public IActionResult Root([FromQuery] double number, [FromQuery] double nthRoot)
+    {
+        return HandleCalculation(() => calculator.Root(number, nthRoot));
+    }
 }
