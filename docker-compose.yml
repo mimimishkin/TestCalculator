@@ -1,0 +1,31 @@
+﻿services:
+  db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: calculator_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: ./TestCalculator
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=testcalculator;Username=postgres;Password=password
+    ports:
+      - '8080:8080'
+      - '8081:8081'
+    volumes:
+      - ./TestCalculator:/app
+    command: ["dotnet", "TestCalculator.dll"]
+
+volumes:
+  db_data:
+

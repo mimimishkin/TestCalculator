@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TestCalculator.Tests;
 
-public class CalculatorControllerTests : IDisposable
+public class CalculatorControllerTests
 {
     private readonly AppDbContext _dbContext;
     private readonly CalculatorController _controller;
@@ -13,18 +13,11 @@ public class CalculatorControllerTests : IDisposable
     public CalculatorControllerTests()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("Filename=:memory:")
+            .UseNpgsql("Host=localhost;Port=5432;Database=testcalculator_test;Username=postgres;Password=password")
             .Options;
         _dbContext = new AppDbContext(options);
-        _dbContext.Database.OpenConnection();
         _dbContext.Database.EnsureCreated();
         _controller = new CalculatorController(new Calculator(), _dbContext);
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Database.CloseConnection();
-        _dbContext.Dispose();
     }
 
     [Fact]

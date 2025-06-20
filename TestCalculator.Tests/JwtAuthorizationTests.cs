@@ -8,25 +8,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TestCalculator.WebApi;
 using TestCalculator.Domain;
-using Microsoft.Data.Sqlite;
 
 namespace TestCalculator.Tests;
 
-public class JwtAuthorizationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
+public class JwtAuthorizationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
-    private readonly SqliteConnection _connection;
 
     public JwtAuthorizationTests(WebApplicationFactory<Program> factory)
     {
-        _connection = new SqliteConnection("Filename=:memory:");
-        _connection.Open();
         _factory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
                 services.RemoveAll<DbContextOptions<AppDbContext>>();
-                services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
+                services.AddDbContext<AppDbContext>(options =>
+                    options.UseNpgsql("Host=localhost;Port=5432;Database=testcalculator_test;Username=postgres;Password=password")
+                );
             });
         });
 
@@ -34,12 +32,6 @@ public class JwtAuthorizationTests : IClassFixture<WebApplicationFactory<Program
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Database.EnsureCreated();
-    }
-
-    public void Dispose()
-    {
-        _connection.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     private async Task<string> RegisterAndLoginAsync(string username, string password)
@@ -131,7 +123,7 @@ public class JwtAuthorizationTests : IClassFixture<WebApplicationFactory<Program
 
     private string CreateExpiredJwt(string username)
     {
-        var key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes("Also try Terraria! Do not try LEGO Fortnite!"));
+        var key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey("Also try Terraria! Do not try LEGO Fortnite!"u8.ToArray());
         var creds = new Microsoft.IdentityModel.Tokens.SigningCredentials(key, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
         var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
             issuer: "TestCalculator",

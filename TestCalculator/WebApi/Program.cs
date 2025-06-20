@@ -16,7 +16,7 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddScoped<ICalculator, Calculator>();
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         var jwtSettings = builder.Configuration.GetSection("Jwt");
         builder.Services.AddAuthentication(options =>
